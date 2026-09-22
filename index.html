@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>카카오내비 실행</title>
+
+  <script
+    src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.6/kakao.min.js"
+    crossorigin="anonymous">
+  </script>
+</head>
+
+<body>
+  <h2>카카오내비 실행</h2>
+  <p id="route">경로를 불러오는 중...</p>
+
+  <button id="go"
+    style="width:100%;padding:20px;font-size:22px;font-weight:bold;">
+    카카오내비 열기
+  </button>
+
+<script>
+  Kakao.init('3511572c1f10c8bcd3f4b71dce36c296');
+
+  const p = new URLSearchParams(location.search);
+
+  const destination = {
+    name: p.get('destName') || '홍대입구역',
+    x: p.get('destX') || '126.9240',
+    y: p.get('destY') || '37.5572',
+    coordType: 'wgs84'
+  };
+
+  const viaName = p.get('viaName');
+  const viaX = p.get('viaX');
+  const viaY = p.get('viaY');
+
+  const viaList =
+    viaName && viaX && viaY
+      ? [{
+          name: viaName,
+          x: viaX,
+          y: viaY,
+          coordType: 'wgs84'
+        }]
+      : [];
+
+  document.getElementById('route').textContent =
+    (viaList.length ? viaName + ' 경유 → ' : '') +
+    destination.name;
+
+  document.getElementById('go').onclick = function () {
+    Kakao.Navi.start({
+      name: destination.name,
+      x: destination.x,
+      y: destination.y,
+      coordType: 'wgs84',
+      viaList: viaList
+    });
+  };
+</script>
+</body>
+</html>
