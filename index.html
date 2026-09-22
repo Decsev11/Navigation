@@ -60,8 +60,7 @@ if (viaName && viaX && viaY) {
   viaList.push({
     name: viaName,
     x: Number(viaX),
-    y: Number(viaY),
-    coordType: "wgs84"
+    y: Number(viaY)
   });
 }
 
@@ -80,7 +79,7 @@ document.getElementById("go").addEventListener("click", function () {
       x: destination.x,
       y: destination.y,
       coordType: "wgs84",
-      viaList: viaList
+      viaPoints: viaList
     });
 
     setTimeout(function () {
