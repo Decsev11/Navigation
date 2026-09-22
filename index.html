@@ -1,64 +1,101 @@
 <!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>카카오내비 실행</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>카카오내비 실행</title>
 
-  <script
-    src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.6/kakao.min.js"
-    crossorigin="anonymous">
-  </script>
+<script src="https://t1.kakaocdn.net/kakao_js_sdk/2.8.3/kakao.min.js"
+        crossorigin="anonymous"></script>
 </head>
 
-<body>
-  <h2>카카오내비 실행</h2>
-  <p id="route">경로를 불러오는 중...</p>
+<body style="font-family:sans-serif;padding:20px">
 
-  <button id="go"
-    style="width:100%;padding:20px;font-size:22px;font-weight:bold;">
-    카카오내비 열기
-  </button>
+<h2>카카오내비 실행</h2>
+<p id="route">경로 준비 중...</p>
+<p id="status">SDK 확인 중...</p>
+
+<button id="go"
+ style="width:100%;padding:22px;font-size:22px;font-weight:bold">
+🚗 카카오내비 열기
+</button>
 
 <script>
-  Kakao.init('3511572c1f10c8bcd3f4b71dce36c296');
+const statusEl = document.getElementById("status");
 
-  const p = new URLSearchParams(location.search);
+try {
+  if (typeof Kakao === "undefined") {
+    throw new Error("Kakao SDK 로딩 실패");
+  }
 
-  const destination = {
-    name: p.get('destName') || '홍대입구역',
-    x: p.get('destX') || '126.9240',
-    y: p.get('destY') || '37.5572',
-    coordType: 'wgs84'
-  };
+  if (!Kakao.isInitialized()) {
+    Kakao.init("3511572c1f10c8bcd3f4b71dce36c296");
+  }
 
-  const viaName = p.get('viaName');
-  const viaX = p.get('viaX');
-  const viaY = p.get('viaY');
+  statusEl.textContent =
+    Kakao.isInitialized()
+      ? "✅ Kakao SDK 초기화 성공"
+      : "❌ Kakao SDK 초기화 실패";
 
-  const viaList =
-    viaName && viaX && viaY
-      ? [{
-          name: viaName,
-          x: viaX,
-          y: viaY,
-          coordType: 'wgs84'
-        }]
-      : [];
+} catch (e) {
+  statusEl.textContent = "❌ " + e.message;
+}
 
-  document.getElementById('route').textContent =
-    (viaList.length ? viaName + ' 경유 → ' : '') +
-    destination.name;
+const p = new URLSearchParams(location.search);
 
-  document.getElementById('go').onclick = function () {
+const destination = {
+  name: p.get("destName") || "홍대입구역",
+  x: Number(p.get("destX") || 126.9240),
+  y: Number(p.get("destY") || 37.5572),
+  coordType: "wgs84"
+};
+
+const viaName = p.get("viaName");
+const viaX = p.get("viaX");
+const viaY = p.get("viaY");
+
+const viaList = [];
+
+if (viaName && viaX && viaY) {
+  viaList.push({
+    name: viaName,
+    x: Number(viaX),
+    y: Number(viaY),
+    coordType: "wgs84"
+  });
+}
+
+document.getElementById("route").textContent =
+  (viaList.length ? viaName + " 경유 → " : "") +
+  destination.name;
+
+document.getElementById("go").addEventListener("click", function () {
+
+  try {
+
+    statusEl.textContent = "카카오내비 실행 요청 중...";
+
     Kakao.Navi.start({
       name: destination.name,
       x: destination.x,
       y: destination.y,
-      coordType: 'wgs84',
+      coordType: "wgs84",
       viaList: viaList
     });
-  };
+
+    setTimeout(function () {
+      statusEl.textContent =
+        "실행 요청 완료 — 앱이 열리지 않았다면 이 문구를 알려주세요.";
+    }, 1500);
+
+  } catch (e) {
+
+    statusEl.textContent =
+      "❌ 실행 오류: " + e.message;
+
+  }
+});
 </script>
+
 </body>
 </html>
